@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>
+    STK JSGp
+</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body onload="javascript:drawWindow(20, 20, 200, 200);">
+    <canvas id="canvas" width="320" height="240" style="border: 1px solid grey;"
+        onmousemove="javascript:displayCoords(event);"
+        onmousedown="javascript:dragWindow(event);"
+        onmouseup="javascript:stopDragging(event); javascript:redrawWindow();"
+        ></canvas>
+    <br />
+    X: <input type="text" id="coords.x" /><br />
+    Y: <input type="text" id="coords.y" />
+    <br/>
+    <script>
+        let isDragging = false;
+        let context;
+        let offset = {
+            x: 0,
+            y: 0
+        }
+        let openWindow = {};
+        let fillColor = "rgba(0, 255, 0, 1.0)";
+        let currentCoords = {};
+        function displayCoords(event) {
+            const x = event.clientX;
+            const y = event.clientY;
+            document.getElementById('coords.x').value = x;
+            document.getElementById('coords.y').value = y;
+            currentCoords.x = x;
+            currentCoords.y = y;
+
+            if (isDragging) {
+                console.error(currentCoords);
+                redrawWindow();
+            }
+
+            const minX = openWindow.closeButton.position.x + 5;
+            const maxX = openWindow.closeButton.position.x + 15;
+            const minY = openWindow.closeButton.position.y + 5;
+            const maxY = openWindow.closeButton.position.y + 15;
+            if (x > minX && x < maxX && y > minY && y < maxY) {
+                fillColor = "rgba(0, 200, 0, 1.0)";
+                this.drawCircle(context, 20 + 200-40, 20+10, 5, fillColor, "rgb(0,0,0)", 0.1);
+            } else {
+                fillColor = "rgba(0, 255, 0, 1.0)";
+                this.drawCircle(context, 20 + 200-40, 20+10, 5, fillColor, "rgb(0,0,0)", 0.1);
+
+            }
+
+        }
+
+        function setDragOffsets(event) {
+            if (!isDragging) {
+                isDragging = true;
+                offset.x = currentCoords.x - openWindow.position.x;
+                offset.y = currentCoords.y - openWindow.position.y;
+            }
+        }
+        
+        function dragWindow(event) {
+            setDragOffsets(event);
+            clearScreen();
+            drawWindow(currentCoords.x - offset.x, currentCoords.y - offset.y, openWindow.size.width, openWindow.size.height);
+        }
+
+        function stopDragging(event) {
+            isDragging = false;
+        }
+
+        function clearScreen() {
+            context.clearRect(0, 0, 320, 240);
+        }
+
+        function getContext() {
+            if (!context) {
+                const canvas = document.getElementById("canvas");
+                context = canvas.getContext("2d");
+            }
+            return context;
+        }
+
+        function drawCircle(ctx, x, y, radius, fill, stroke, strokeWidth) {
+            ctx.beginPath()
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
+            if (fill) {
+                ctx.fillStyle = fill
+                ctx.fill()
+            }
+            if (stroke) {
+                ctx.lineWidth = strokeWidth
+                ctx.strokeStyle = stroke
+                ctx.stroke()
+            }
+        }
+
+        function redrawWindow() {
+            clearScreen();
+            drawWindow(currentCoords.x - offset.x, currentCoords.y - offset.y, openWindow.size.width, openWindow.size.height);
+        }
+
+        function drawWindow(x, y, width, height) {
+            const ctx = getContext();
+            ctx.fillStyle = "rgb(0, 0, 0)";
+            ctx.fillRect(x-2, y-2, width+4, height+4)
+            ctx.fillStyle = "rgb(200,200,200)";
+            ctx.fillRect(x, y, width, 20);
+            ctx.fillStyle = "rgb(255, 255, 255)";
+            ctx.fillRect(x, y+20, width, height-20);
+
+            this.drawCircle(ctx, x + width-40, y+10, 5, fillColor, "rgb(0,0,0)", 1);
+            this.drawCircle(ctx, x + width-25, y+10, 5, "rgba(255, 255, 0, 1.0)", "rgb(0,0,0)", 1);
+            this.drawCircle(ctx, x + width-10, y+10, 5, "rgba(255, 0, 0, 1.0)", "rgb(0,0,0)", 1);
+
+            ctx.font = "12px Arial";
+            ctx.fillStyle = "rgb(0,0,0)";
+            ctx.fillText("Hello World", x+5, y+15);
+            openWindow = {
+                size: {
+                    width: width,
+                    height: height
+                },
+                position: {
+                    x: x,
+                    y: y
+                },
+                closeButton: {
+                    position: {
+                        x: x+width-40,
+                        y: y+10
+                    }
+                },
+                minimizeButton: {
+                    position: {
+                        x: x+width-25,
+                        y: y+30
+                    }
+                },
+                maximizeButton: {
+                    position: {
+                        x: x+width-10,
+                        y: y+30
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
